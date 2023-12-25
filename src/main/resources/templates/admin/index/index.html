@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>XUNMAW-CMS后台管理系统</title>
+
+    <!-- 页面加载进度动画 -->
+    <script th:src="@{admin/plugins/pace-progress/pace.js}"></script>
+    <link rel="stylesheet" th:href="@{admin/plugins/pace-progress/themes/blue/pace-theme-flash.css}"/>
+    <!-- Daterange picker -->
+    <link rel="stylesheet" th:href="@{admin/plugins/daterangepicker/daterangepicker.css}"/>
+    <link rel="stylesheet" th:href="@{admin/plugins/fontawesome-free/css/all.min.css}"/>
+    <link rel="stylesheet" th:href="@{admin/plugins/adminlte/css/adminlte.min.css}"/>
+    <link rel="stylesheet" th:href="@{admin/plugins/bootstrap-table/css/bootstrap-table.min.css}"/>
+    <link rel="stylesheet" th:href="@{admin/plugins/icheck-bootstrap/icheck-bootstrap.css}"/>
+    <link rel="stylesheet" th:href="@{admin/plugins/uploader/css/webuploader.css}"/>
+    <link rel="stylesheet" th:href="@{admin/plugins/ztree/css/ztree-bootstrap.css}"/>
+    <link rel="stylesheet" th:href="@{admin/plugins/fontawesome-iconpicker/css/fontawesome-iconpicker.min.css}"/>
+    <link rel="stylesheet" th:href="@{admin/css/admin.css}"/>
+
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed" onhashchange="handleHashChange()">
+<div class="wrapper">
+
+    <!-- 顶部导航栏 -->
+    <div th:replace="admin/fragments/navbar :: navbar"></div>
+
+    <!-- 主侧边栏容器 -->
+    <div th:replace="admin/fragments/sidebar :: sidebar(${menuTree})"></div>
+
+    <!-- 页面内容包装器 开始 -->
+    <!-- 根据URL的hash值(#号后面的值)动态刷新内容区域 -->
+    <div class="content-wrapper text-sm" id="content">
+        <!-- 内容标题（页面标题）开始 -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 class="m-0 text-dark">Dashboard</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="#">Home</a></li>
+                            <li class="breadcrumb-item active">Dashboard</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 主内容 结束 -->
+    </div>
+    <!-- 页面内容包装器 结束 -->
+
+    <!-- 控制侧栏 开始 -->
+    <aside class="control-sidebar control-sidebar-dark">
+
+    </aside>
+    <!-- 控制侧栏 结束 -->
+
+    <!-- 页脚区域 -->
+    <div th:replace="admin/fragments/footer :: footer"></div>
+
+    <section id="formModalWrapper">
+        <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="formTitle"></h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="changePasswordFormContent"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="changePasswordBtn">保存
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- REQUIRED SCRIPTS -->
+
+<!-- jQuery -->
+<script th:src="@{admin/plugins/jquery/jquery.min.js}"></script>
+<!-- moment -->
+<script th:src="@{admin/plugins/moment/moment.min.js}"></script>
+<!-- daterangepicker -->
+<script th:src="@{admin/plugins/daterangepicker/daterangepicker.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{admin/plugins/jquery-ui/jquery-ui.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{admin/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{admin/plugins/adminlte/js/adminlte.min.js}"></script>
+<script th:src="@{admin/plugins/adminlte/js/demo.js}"></script>
+<!-- Bootstrap Table -->
+<script th:src="@{admin/plugins/bootstrap-table/js/bootstrap-table.min.js}"></script>
+<script th:src="@{admin/plugins/bootstrap-table/js/bootstrap-table-zh-CN.min.js}"></script>
+<!-- uploader -->
+<script th:src="@{admin/plugins/uploader/js/webuploader.js}"></script>
+<script th:src="@{admin/plugins/uploader/js/jax.uploader.js}"></script>
+<script th:src="@{admin/plugins/uploader/js/uploadCall.js}"></script>
+<!-- layer -->
+<script th:src="@{admin/plugins/layer/layer.js}"></script>
+<!-- ztree -->
+<script th:src="@{admin/plugins/ztree/js/jquery.ztree.all.min.js}"></script>
+<!-- iconpicker -->
+<script th:src="@{admin/plugins/fontawesome-iconpicker/js/fontawesome-iconpicker.min.js}"></script>
+<!-- bootstrap-switch -->
+<script th:src="@{admin/plugins/bootstrap-switch/js/bootstrap-switch.min.js}"></script>
+
+<script th:src="@{admin/js/core.js}"></script>
+
+<!-- 声明项目上下文路径 -->
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    ctx = /*[[@{/}]]*/ '';
+    /*]]>*/
+</script>
+<script type="text/javascript" th:inline="javascript">
+    const activeName = 'active';
+    const defaultPageHash = '#workdest';
+    $(function () {
+        handleHashChange()
+    });
+
+    function handleHashChange() {
+        var hash = location.hash;
+        // console.log(hash)
+        hash = hash ? hash : defaultPageHash
+        $('.sidebar-menu a').removeClass(activeName);
+        var $href = $('.sidebar-menu > a[href="' + hash + '"]');
+        if ($href.length > 0) {
+            $href.addClass(activeName).parent().parent().siblings().addClass(activeName).parent().addClass('menu-open');
+        }
+        Core.load("#content", hash.replace('#', ''));
+    }
+
+    $('#changePasswordBtn').on('click', function () {
+        var $f = $('#changePasswordForm');
+        var valid = $f[0].checkValidity();
+        if (valid) {
+            Core.mask("#changePasswordBtn");
+            Core.postAjax('/user/changePassword', $f.serialize(), function (data) {
+                Core.unmask("#changePasswordBtn");
+                if (data.status === 200) {
+                    $("#changePasswordModal").modal("hide");
+                }
+                layer.msg(data.msg);
+            }, function () {
+                Core.unmask("#changePasswordBtn");
+            })
+        }
+        $f.addClass("was-validated")
+    })
+</script>
+
+</body>
+</html>

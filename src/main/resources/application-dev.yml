@@ -1,0 +1,29 @@
+spring:
+  cache:
+    # 可根据此配置，自由选择是否使用redis：配置为redis则启用redis缓存，配置为none时则禁用缓存。
+    type: redis
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3000/xunmaw-cms?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+  redis:
+    host: localhost
+    port: 6379
+    password: xxl@bmp
+    timeout: 5000
+server:
+  servlet:
+    context-path: /
+
+file:
+  #上传的文件对外暴露的访问路径
+  access-path-pattern: /u/**
+  #文件上传目录
+  upload-folder: /Users/linzhaoguan/workspace/projects/cms/pb-cms-gitee/upload/
+  #文件预览、下载的访问路径前缀
+  access-prefix-url: http://localhost:8080/u
+
+static:
+  folder: D://your/html/path

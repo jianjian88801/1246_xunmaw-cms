@@ -1,0 +1,50 @@
+<!-- 主侧边栏容器 -->
+<aside th:fragment="sidebar(menuTree)" class="main-sidebar sidebar-dark-purple elevation-4">
+    <!-- Brand Logo -->
+    <a href="#" class="brand-link">
+        <img th:src="@{admin/plugins/adminlte/img/xunmaw.jpg}" alt="xunmaw-cms Logo"
+             class="brand-image  elevation-3" style="opacity: .8">
+       <!-- <span class="brand-text font-weight-light">CMS</span>-->
+    </a>
+
+    <!-- 侧边栏 开始 -->
+    <div class="sidebar">
+        <!-- 侧边栏用户面板 (可选) -->
+        <!--<div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img th:src="@{admin/plugins/adminlte/img/user3-128x128.jpg}"
+                     class="img-circle elevation-2" alt="User Image">
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">xunmaw</a>
+            </div>
+        </div>-->
+
+        <!-- 侧边栏菜单 开始 -->
+        <nav class="mt-2">
+            <ul th:include="this::menu(${menuTree})" class="nav nav-pills nav-sidebar nav-child-indent flex-column"
+                data-widget="treeview"
+                role="menu"
+                data-accordion="true"></ul>
+        </nav>
+        <!-- 导航菜单 结束 -->
+    </div>
+    <!-- 侧边栏 结束 -->
+</aside>
+
+<th:block th:fragment="menu(menuTree)">
+    <!-- 添加类名nav-icon然后引入font-awesome等图标库即可添加图标链接 -->
+    <li th:each="menu : ${menuTree}" class="nav-item has-treeview sidebar-menu ">
+        <a th:href="${menu.url}" class="nav-link">
+            <i th:classappend="${menu.icon}" class="nav-icon"></i>
+            <p>
+                <th:block th:text="${menu.name}"/>
+                <i th:classappend="${menu.parentId == 0} and !${#lists.isEmpty(menu.children)} ? 'fas fa-angle-left' : ''"
+                   class="right"></i>
+            </p>
+        </a>
+        <ul th:unless="${#lists.isEmpty(menu.children)}" th:include="this::menu(${menu.children})"
+            class="nav nav-treeview"></ul>
+    </li>
+
+</th:block>

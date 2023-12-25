@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/xunmaw-cms?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
+    username: root
+    password: user_password
+  redis:
+    host: localhost
+    port: 6379
+    password: user_password
+    timeout: 5000
+    jedis:
+      pool:
+        max-idle: 8
+        min-idle: 0
+        max-active: 8
+        max-wait: -1
+    database: 6
+
+file:
+  #上传的文件对外暴露的访问路径
+  access-path-pattern: /u/**
+  #文件上传目录
+  upload-folder: /data/wwwroot/www.xunmaw.com/upload/
+  #文件预览、下载的绝对路径
+  access-prefix-url: https://www.xunmaw.com/u

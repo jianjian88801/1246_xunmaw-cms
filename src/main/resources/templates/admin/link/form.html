@@ -1,0 +1,67 @@
+<form id="linkForm">
+    <input name="id" type="hidden" th:value="${link?.id}">
+    <input name="origin" type="hidden" value="1">
+    <div class="form-group row">
+        <label for="name" class="col-sm-2 col-form-label">站点名称:</label>
+        <div class="col-sm-10">
+            <input type="text" th:value="${link?.name}" name="name" class="form-control" id="name"
+                   placeholder="填写站点名称" required>
+            <div class="invalid-feedback">请填写站点名称</div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="url" class="col-sm-2 col-form-label">站点链接:</label>
+        <div class="col-sm-10">
+            <input type="text" th:value="${link?.url}" name="url" class="form-control"
+                   id="url"
+                   placeholder="填写站点链接" required>
+            <div class="invalid-feedback">请填写站点链接</div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="description" class="col-sm-2 col-form-label">站点描述:</label>
+        <div class="col-sm-10">
+            <input type="text" th:value="${link?.description}" name="description" class="form-control"
+                   id="description"
+                   placeholder="填写站点描述" required>
+            <div class="invalid-feedback">请填写站点描述</div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="img" class="col-sm-2 col-form-label">站长图片:</label>
+        <div class="col-sm-10">
+            <input type="text" th:value="${link?.img}" name="img" class="form-control"
+                   id="img"
+                   placeholder="填写站长图片" required>
+            <div class="invalid-feedback">请填写站长图片</div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="email" class="col-sm-2 col-form-label">站长邮箱:</label>
+        <div class="col-sm-10">
+            <input type="text" th:value="${link?.email}" name="email" class="form-control"
+                   id="email" placeholder="填写站长邮箱">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="qq" class="col-sm-2 col-form-label">站长QQ:</label>
+        <div class="col-sm-10">
+            <input type="text" th:value="${link?.qq}" name="qq" class="form-control"
+                   id="qq" placeholder="填写站长QQ">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="remark" class="col-sm-2 col-form-label">备注:</label>
+        <div class="col-sm-10">
+            <input type="text" th:value="${link?.remark}" name="remark" class="form-control"
+                   id="remark" placeholder="填写备注">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="remark" class="col-sm-2 col-form-label">状态:</label>
+        <div class="col-sm-10">
+            <label class="radio-inline pr-5"><input type="radio" th:field="*{link.status}" name="status" value="1"> 启用</label>
+            <label class="radio-inline pr-5"><input type="radio" th:field="*{link.status}" name="status" value="0"> 禁用</label>
+        </div>
+    </div>
+</form>

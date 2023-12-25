@@ -1,0 +1,49 @@
+<nav id ="navbar" th:fragment="navbar" class="navbar navbar-default ">
+    <div class="pb-container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+							<span class="sr-only">
+								导航
+							</span>
+                <span class="icon-bar">
+							</span>
+                <span class="icon-bar">
+							</span>
+                <span class="icon-bar">
+							</span>
+            </button>
+            <a class="logo-a" th:href="@{/}">
+                <img src="https://www.xunmaw.com/_next/image?url=%2Fstatic%2Fimg%2Flogo%2Flogo-name%20%402x.png&w=256&q=75" alt="logo" />
+            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-right" aria-expanded="false">
+            <ul class="nav navbar-nav">
+                <li th:class="${categoryId=='index' ? 'active' : ''} ">
+                    <a th:href="@{/}">
+                        首页
+                    </a>
+                </li>
+                <li th:each="category:${CATEGORY_LIST}" th:class="${category.id==categoryId ? 'active':(#lists.isEmpty(category.children)?'':'dropdown')}">
+                    <a th:if="${category.pid==null||category.pid==0}" th:href="@{${not #lists.isEmpty(category.children)? '#': ('/blog/category/' + category.id)}}" th:class="${#lists.isEmpty(category.children)?'':'dropdown-toggle'}" th:data-toggle="${#lists.isEmpty(category.children)?'':'dropdown'}">
+                        <span th:text="${category.name}"></span>
+                        <b th:if="${not #lists.isEmpty(category.children)}" class="caret"></b>
+                    </a>
+                    <ul th:if="${not #lists.isEmpty(category.children)}" class="dropdown-menu">
+                        <li th:each="node:${category.children}"><a th:href="@{${'/blog/category/' + node.id}}" th:text="${node.name}"></a></li>
+                    </ul>
+
+                </li>
+                <li class="">
+                    <a th:href="@{/blog/comment}" th:class="${categoryId=='comment' ? 'active' : ''} ">
+                        留言板
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="alert('敬请期待')">
+                        <i  class="fa fa-search search-btn"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

@@ -1,0 +1,277 @@
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">文章列表</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a th:href="@{admin}">首页</a></li>
+                    <li class="breadcrumb-item active">文章管理</li>
+                    <li class="breadcrumb-item active">文章列表</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- Main content -->
+<section class="content">
+    <div class="card card-info">
+        <form id="searchForm" class="needs-validation form-inline" novalidate="">
+            <div class="form-group">
+                <label for="keywords">关键字:</label>
+                <input type="text" class="form-control m-2" id="keywords" required="">
+            </div>
+            <div class="form-group">
+                <label for="categoryId">分类:</label>
+                <select id="categoryId" class="form-control m-2" required="">
+                    <option selected disabled>选择分类</option>
+                    <option th:each="category:${categories}" th:value="${category.id}"
+                            th:text="${category.name}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">状态:</label>
+                <select id="status" class="form-control m-2" required="">
+                    <option selected disabled>选择状态</option>
+                    <option value="1">已发布</option>
+                    <option value="0">草稿</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary ml-3" type="submit">查询</button>
+                <button class="btn btn-default ml-2" type="reset">重置</button>
+            </div>
+        </form>
+    </div>
+    <div class="card card-body">
+        <div id="toolbar" class="btn-group">
+            <shiro:hasPermission name="article:add">
+                <button id="btn_add" type="button" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>写文章
+                </button>
+            </shiro:hasPermission>
+            <shiro:hasPermission name="article:batchDelete">
+                <button id="btn_batch_delete" type="button" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>批量删除
+                </button>
+            </shiro:hasPermission>
+            <shiro:hasPermission name="article:batchPush">
+                <button id="btn_batch_push" type="button" class="btn btn-info">
+                    <span class="fa fa-send-o" aria-hidden="true"></span>批量推送
+                </button>
+            </shiro:hasPermission>
+        </div>
+        <table class="table-sm" id="table"></table>
+    </div>
+</section>
+
+<script>
+    var editFlag = "[[${@perms.hasPerm('article:edit')}]]";
+    var deleteFlag = "[[${@perms.hasPerm('article:delete')}]]";
+    var columns = [
+        {checkbox: true},
+        {
+            field: 'title',
+            title: '标题',
+            align: "center"
+        }, {
+            field: 'bizCategory',
+            title: '分类',
+            align: "center",
+            width: 100,
+            formatter: function (value) {
+                return value.name;
+            }
+        }, {
+            field: 'tags',
+            title: '标签',
+            class: 'table-tags',
+            align: "center",
+            formatter: function (tags) {
+                var tagHtml = '';
+                if (tags) {
+                    for (var i = 0, len = tags.length; i < len; i++) {
+                        var tag = tags[i];
+                        tagHtml += '<span class="badge badge-info">' + tag.name + '</span> ';
+                    }
+                }
+                return tagHtml;
+            }
+        }, {
+            field: 'coverImage',
+            title: '缩略图',
+            align: "center",
+            class: "link-pre",
+            formatter: function (value, row, index) {
+                return '<img src="' + value + '" style="width: 100px" onclick="previewImg(\'' + value + '\')"/>'
+            }
+        }, {
+            field: 'slider',
+            title: '轮播',
+            align: "center",
+            formatter: function (value) {
+                return value ? '是' : '否'
+            }
+        }, {
+            field: 'top',
+            title: '置顶',
+            align: "center",
+            formatter: function (value) {
+                return value ? '是' : '否'
+            }
+        }, {
+            field: 'recommended',
+            title: '推荐',
+            align: "center",
+            formatter: function (value) {
+                return value ? '是' : '否'
+            }
+        }, {
+            field: 'status',
+            title: '状态',
+            align: "center",
+            formatter: function (value) {
+                return value ? '已发布' : '草稿'
+            }
+        }, {
+            field: 'lookCount',
+            title: '浏览',
+            align: "center",
+        }, {
+            field: 'commentCount',
+            title: '评论',
+            align: "center",
+        }, {
+            field: 'loveCount',
+            title: '喜欢',
+            align: "center",
+        },
+        {
+            field: 'operation',
+            title: '操作',
+            align: "center",
+            width: 150,
+            formatter: function (value, row, index) {
+                var edit = editFlag === 'true' ? '<button class="btn btn-info btn-sm" onclick="editArticle(' + row.id + ')">编辑</button>' : '';
+                var del = deleteFlag === 'true' ? '<button class="btn btn-danger btn-sm ml-1" onclick="deleteArticle(' + row.id + ')">删除</button>' : '';
+                return edit + del;
+            }
+        }];
+    var options = {
+        id: "#table",
+        url: '/article/list',
+        columns: columns,
+        toolbar: '#toolbar',
+        showRefresh: true,
+        queryParams: queryParams
+    }
+    Core.initTable(options);
+
+    function refreshTable() {
+        Core.refreshTable("#table")
+    }
+
+    /*查询参数*/
+    function queryParams(params) {
+        return {
+            pageNumber: params.pageNumber,
+            pageSize: params.pageSize,
+            keywords: $("#keywords").val(),
+            categoryId: $("#categoryId").val(),
+            status: $("#status").val(),
+        };
+    }
+
+    /*编辑*/
+    function editArticle(id) {
+        window.location.href = "#article/edit?id=" + id
+    }
+
+    /*删除*/
+    function deleteArticle(id) {
+        Core.confirm("确定删除该分类？", function () {
+            Core.postAjax("/article/delete", {"id": id}, function (data) {
+                if (data.status === 200) {
+                    refreshTable();
+                }
+                layer.msg(data.msg);
+            })
+        })
+    }
+
+    $(function () {
+        // 查询
+        $('#searchForm').submit(function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            refreshTable();
+        })
+
+        // 新增
+        $("#btn_add").click(function () {
+            window.location.href = "#article/add"
+        });
+        // 批量删除
+        $("#btn_batch_delete").click(function () {
+            var checkedRows = Core.selectMutiData("#table");
+            if (checkedRows) {
+                Core.confirm("确定删除选中的" + checkedRows.length + "条记录？", function () {
+                    var ids = [];
+                    $.each(checkedRows, function (i, item) {
+                        ids.push(item.id);
+                    })
+                    Core.postAjax("/article/batch/delete", {"ids": ids}, function (data) {
+                        if (data.status === 200) {
+                            refreshTable();
+                        }
+                        layer.msg(data.msg);
+                    })
+                })
+            }
+        });
+        /*批量推送*/
+        $("#btn_batch_push").click(function () {
+            var checkedRows = Core.selectMutiData("#table");
+            if (checkedRows) {
+                Core.confirm("确定推送选中的" + checkedRows.length + "条记录？", function () {
+                    var baseUrl = window.location.protocol + "//" + window.location.host + "/blog/article/";
+                    var urls = [];
+                    $.each(checkedRows, function (i, item) {
+                        urls.push(baseUrl + item.id);
+                    })
+                    Core.postAjax("/article/batch/push", {"urls": urls}, function (data) {
+                        if (data.status === 200) {
+                            layer.msg(data.msg);
+                        } else {
+                            if (null !== data.data) {
+                                var msg = "推送成功" + data.data.success + "条;";
+                                var notSameSiteLength = data.data.notSameSite == null ? 0 : data.data.notSameSite.length;
+                                var notValidLength = data.data.notValid == null ? 0 : data.data.notValid.length;
+                                msg += ("推送失败" + (notSameSiteLength + notValidLength) + "条");
+                                layer.msg(msg);
+                            } else {
+                                layer.msg(data.msg);
+                            }
+                        }
+
+                    })
+                })
+            }
+        });
+
+    });
+
+    function previewImg(src) {
+        layer.open({
+            type: 1,
+            title: false,
+            closeBtn: 0,
+            area: '45%',
+            skin: 'layui-layer-nobg', //没有背景色
+            shadeClose: true,
+            content: '<img style="width: 100%" alt="link" src="' + src + '">'
+        });
+    }
+
+</script>

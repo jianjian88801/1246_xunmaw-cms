@@ -1,0 +1,209 @@
+<link rel="stylesheet" th:href="@{admin/plugins/treegrid/jquery.treegrid.css}">
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">分类管理</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a th:href="@{admin}">首页</a></li>
+                    <li class="breadcrumb-item active">文章管理</li>
+                    <li class="breadcrumb-item active">分类管理</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- Main content -->
+<section class="content">
+    <div class="card card-body">
+        <div id="toolbar">
+            <shiro:hasPermission name="article:add">
+                <button id="btn_add" type="button" class="btn btn-primary" onclick="addCategory()">
+                    <span class="fas fa-plus" aria-hidden="true"></span>新增
+                </button>
+            </shiro:hasPermission>
+        </div>
+        <table class="table-sm mt-3" id="table"></table>
+        <div id="categoryLayer" style="display: none;padding: 20px;">
+            <table id="p-table"></table>
+        </div>
+    </div>
+
+</section>
+
+<!-- 表单模态框 -->
+<div class="modal fade" id="formModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formTitle"></h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="formContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveOrUpdateBtn" onclick="saveOrUpdate()">保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{admin/plugins/treegrid/jquery.treegrid.min.js}"></script>
+<script th:src="@{admin/plugins/treegrid/jquery.treegrid.extension.js}"></script>
+<script th:src="@{admin/plugins/treegrid/tree.table.js}"></script>
+<script>
+    var editFlag = "[[${@perms.hasPerm('category:edit')}]]";
+    var deleteFlag = "[[${@perms.hasPerm('category:delete')}]]";
+    var treeTableConf = {
+        id: "table",
+        table: null,
+        columns: [
+            {
+                field: 'selectItem',
+                radio: true
+            },
+            {
+                field: 'name',
+                title: '分类名称',
+                align: "left"
+            }, {
+                field: 'description',
+                title: '分类描述',
+                align: "center"
+            }, {
+                field: 'sort',
+                title: '排序',
+                align: "center",
+            },
+            {
+                field: 'operation',
+                title: '操作',
+                align: "center",
+                formatter: function (row, index) {
+                    var edit = editFlag == "true" ? '<button type="button" class="btn btn-info btn-sm" onclick="editCategory(' + row.id + ')">编辑</button>' : '';
+                    var del = deleteFlag == "true" ? '<button type="button"  class="btn btn-danger btn-sm ml-2" onclick="deleteCategory(' + row.id + ')">删除</button>' : '';
+                    return edit + del;
+                }
+            }]
+    };
+
+    /*加载列表*/
+    $(function () {
+        var table = new TreeTable(treeTableConf.id, "/category/list", treeTableConf.columns, "id");
+        table.setExpandColumn(1);
+        table.setIdField("id");
+        table.setCodeField("id");
+        table.setParentCodeField("pid");
+        table.setStriped(false);
+        table.init();
+        treeTableConf.table = table;
+    });
+
+    /*新增*/
+    function addCategory() {
+        Core.load("#formContent", "/category/add", function () {
+            $('#formTitle').text('新增')
+            $("#formModal").modal('show');
+        }, 2);
+    }
+
+    /*编辑*/
+    function editCategory(id) {
+        Core.load("#formContent", "/category/edit?id=" + id, function () {
+            $('#formTitle').text('编辑')
+            $("#formModal").modal('show');
+        }, 2);
+    }
+
+    /*删除*/
+    function deleteCategory(id) {
+        Core.confirm("确定删除该分类？", function () {
+            Core.postAjax("/category/delete", {"id": id}, function (data) {
+                if (data.status === 200) {
+                    treeTableConf.table.refresh();
+                }
+                layer.msg(data.msg);
+            })
+        })
+    }
+
+    /*加载一级分类*/
+    function showCategory(flag) {
+        Core.postAjax("/category/list", {isFistLevel: true}, function (data) {
+            if ($("#p-table").children().length > 0) {
+                $('#p-table').bootstrapTable('load', data);
+            } else {
+                $('#p-table').bootstrapTable({
+                    columns: [{radio: true},
+                        {
+                            field: 'name',
+                            title: '分类名称',
+                            align: "center"
+                        }, {
+                            field: 'sort',
+                            title: '排序',
+                            align: "center",
+                        }],
+                    data: data,
+                    cache: false,
+                    clickToSelect: true
+                });
+            }
+
+
+            layer.open({
+                type: 1,
+                offset: '50px',
+                skin: 'layui-layer-molv',
+                title: "选择分类",
+                area: ['300px', '450px'],
+                content: jQuery("#categoryLayer"),
+                btn: ['确定', '取消'],
+                btn1: function (index) {
+                    var result = Core.selectSingleData("#p-table");
+                    if (result) {
+                        if (flag == 1) {
+                            $("#pid").val(result.id);
+                            $("#pname").val(result.name);
+                        } else {
+                            $("#d-pid").val(result.id);
+                            $("#d-pname").val(result.name);
+                        }
+
+                        layer.close(index);
+                    }
+                }
+            });
+        })
+
+    }
+
+    function saveOrUpdate() {
+        var $f = $('#categoryForm');
+        var valid = $f[0].checkValidity();
+        var url = $f.find("input[name='id']").val() ? "/category/edit" : "/category/add"
+        if (valid) {
+            Core.mask("#saveOrUpdateBtn");
+            Core.postAjax(url, $f.serialize(), function (data) {
+                Core.unmask("#saveOrUpdateBtn");
+                if (data.status === 200) {
+                    $("#formModal").modal("hide");
+                    treeTableConf.table.refresh();
+                }
+                layer.msg(data.msg);
+            }, function () {
+                Core.unmask("#saveOrUpdateBtn");
+            })
+        }
+        $f.addClass("was-validated")
+    }
+
+</script>

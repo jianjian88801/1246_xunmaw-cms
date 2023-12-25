@@ -1,0 +1,142 @@
+<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> 首页</a></li>
+        <li><a href="#">文件管理</a></li>
+        <li class="active">上传配置</li>
+    </ol>
+</section>
+<!-- Main content -->
+<section class="content">
+    <div class="box box-primary">
+        <div class="box-body">
+            <form class="form-horizontal" id="cloudConfigForm">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">类型 :</label>
+                    <div class="btn-group col-sm-8" id="oss-type">
+                        <label class="radio-inline pr-5 oss-type-radio"><input type="radio" th:field="*{cloudStorageConfig.type}" name="type" value="1" > 七牛云</label>
+                        <label class="radio-inline pr-5 oss-type-radio"><input type="radio" th:field="*{cloudStorageConfig.type}" name="type" value="2" > 阿里云</label>
+                        <label class="radio-inline pr-5 oss-type-radio"><input type="radio" th:field="*{cloudStorageConfig.type}" name="type" value="3" disabled="disabled"> 腾讯云</label>
+                        <label class="radio-inline pr-5 oss-type-radio"><input type="radio" th:field="*{cloudStorageConfig.type}" name="type" value="4"> 本地</label>
+                    </div>
+                </div>
+                <div id="oss-type-form-group">
+                    <div id="oss-type-1">
+                        <div class="form-group">
+                            <div class="col-sm-8 col-sm-offset-3">
+                                <p class="form-control-static"><a href="https://portal.qiniu.com/signup" target="_blank">免费申请(七牛云)10GB储存空间</a></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">域名 :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.qiniuDomain}" name="qiniuDomain" require="必填项" domain=""  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">前缀 :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.qiniuPrefix}" name="qiniuPrefix"  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">AccessKey :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.qiniuAccessKey}" name="qiniuAccessKey" require="必填项"  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">SecretKey :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.qiniuSecretKey}" name="qiniuSecretKey" require="必填项"  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">空间名 :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.qiniuBucketName}" name="qiniuBucketName" require="必填项"  placeholder="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="oss-type-2">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">域名 :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.aliyunDomain}" name="aliyunDomain" require="必填项" domain=""  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">前缀 :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.aliyunPrefix}" name="aliyunPrefix"  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">EndPoint :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.aliyunEndPoint}" name="aliyunEndPoint" require="必填项"  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">AccessKeyId :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.aliyunAccessKeyId}" name="aliyunAccessKeyId" require="必填项"  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">AccessKeySecret :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.aliyunAccessKeySecret}" name="aliyunAccessKeySecret" require="必填项"  placeholder="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">空间名 :</label>
+                            <div class="col-sm-8 col-md-6">
+                                <input type="text" class="form-control" th:value="${cloudStorageConfig.aliyunBucketName}" name="aliyunBucketName" require="必填项"  placeholder="">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="oss-type-4">
+                        <h4>文件上传到本地：需要配置resources目录下的yml文件。相关的配置参数如下：</h4>
+                        <h5>file.access-path-pattern（通过url访问文件的统一前缀，如 /u/**）</h5>
+                        <h5>file.upload-folder（文件在磁盘的存储目录，如 /home/uploads）</h5>
+                        <h5>file.access-prefix-url（通过url访问文件的前缀地址，如 http://xxx.com）</h5>
+                    </div>
+                </div>
+
+                <shiro:hasPermission name="upload:saveConfig">
+                <div class="form-group">
+                    <div class="col-sm-8  col-sm-offset-3">
+                        <button id="saveConfig" type="button" class="btn btn-info">保存</button>
+                    </div>
+                </div>
+                </shiro:hasPermission>
+                <!-- /.box-footer -->
+            </form>
+        </div>
+    </div>
+</section>
+<script type="text/javascript">
+    $(function () {
+
+        var menuType = $('input:radio[name="type"]:checked').val();
+        $('#oss-type-' + menuType).show().siblings().hide();
+
+        $('input[type=radio][name=type]').change(function () {
+            $('#oss-type-' + this.value).show().siblings().hide();
+        });
+
+
+        $("#saveConfig").on('click', function () {
+            Core.mask("#saveConfig");
+            Core.postAjax("/attachment/saveConfig",$("#cloudConfigForm").serialize(),function (data) {
+                Core.unmask("#saveConfig");
+                layer.msg(data.msg);
+            })
+
+        })
+    });
+</script>
+
+

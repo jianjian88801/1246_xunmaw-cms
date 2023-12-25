@@ -1,0 +1,234 @@
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">主题管理</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a th:href="@{admin}">首页</a></li>
+                    <li class="breadcrumb-item active">网站管理</li>
+                    <li class="breadcrumb-item active">主题管理</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- Main content -->
+<section class="content">
+    <div class="card card-body">
+        <div id="toolbar" class="btn-group">
+            <shiro:hasPermission name="tag:add">
+                <button id="btn_add" type="button" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+                </button>
+            </shiro:hasPermission>
+            <shiro:hasPermission name="tag:batchDelete">
+                <button id="btn_batch_delete" type="button" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>批量删除
+                </button>
+            </shiro:hasPermission>
+        </div>
+        <table class="table-sm" id="table"></table>
+    </div>
+</section>
+
+
+<!-- 表单模态框 -->
+<section id="formModalWrapper">
+    <div class="modal fade" id="formModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="formTitle"></h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="formContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveOrUpdateBtn" onclick="saveOrUpdate">保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+
+    $(function () {
+
+        var useFlag = "[[${@perms.hasPerm('theme:use')}]]";
+        var editFlag = "[[${@perms.hasPerm('theme:edit')}]]";
+        var deleteFlag = "[[${@perms.hasPerm('theme:delete')}]]";
+
+        window.operateEvents = {
+            // 点击编辑
+            'click .btn_edit': function (e, value, row, index) {
+                editRow(row.id)
+            },
+            // 点击删除
+            'click .btn_del': function (e, value, row, index) {
+                deleteRow(row.id)
+            },
+            // 点击删除
+            'click .btn_use_theme': function (e, value, row, index) {
+                useTheme(row.id)
+            }
+        }
+        var columns = [
+            {checkbox: true},
+            {
+                field: 'name',
+                title: '主题名称',
+                align: "center"
+            }, {
+                field: 'description',
+                title: '主题描述',
+                align: "center",
+            }, {
+                field: 'img',
+                title: '主题预览',
+                align: "center",
+                class: "theme-pre",
+                formatter: function (value, row, index) {
+                    return value ? '<img src="' + value + '" onclick="previewImg(\'' + value + '\')"/>' : '无'
+                }
+            },
+            {
+                field: 'operation',
+                title: '操作',
+                align: "center",
+                width: 200,
+                events: operateEvents,
+                formatter: operationFormatter
+            }];
+
+        function operationFormatter(value, row, index) {
+            var use = useFlag == "true" && row.status == 0 ? '<button class="btn btn-danger btn-sm ml-1 btn_use_theme">启用</button>' : '';
+            var edit = editFlag == "true" ? '<button class="btn btn-info ml-1 btn-sm btn_edit">编辑</button>' : '';
+            var del = deleteFlag == "true" ? '<button class="btn btn-danger btn-sm ml-1 btn_del">删除</button>' : '';
+            return use + edit + del;
+        }
+
+        var options = {
+            id: "#table",
+            url: '/theme/list',
+            columns: columns,
+            toolbar: '#toolbar',
+            showRefresh: true,
+            queryParams: queryParams
+        }
+        Core.initTable(options);
+
+        function refreshTable() {
+            Core.refreshTable("#table")
+        }
+
+        // 查询参数
+        function queryParams(params) {
+            return {
+                pageNumber: params.pageNumber,
+                pageSize: params.pageSize,
+            };
+        }
+
+        // 新增
+        $('#btn_add').on('click', function () {
+            Core.load("#formContent", "/theme/add", function () {
+                $('#formTitle').text('新增')
+                $("#formModal").modal('show');
+            });
+        })
+
+        // 编辑
+        function editRow(id) {
+            Core.load("#formContent", "/theme/edit?id=" + id, function () {
+                $('#formTitle').text('编辑')
+                $("#formModal").modal('show');
+            });
+        }
+
+        // 删除
+        function deleteRow(id) {
+            Core.confirm("确定删除？", function () {
+                Core.postAjax("/theme/delete", {"id": id}, function (data) {
+                    if (data.status === 200) {
+                        refreshTable();
+                    }
+                    layer.msg(data.msg);
+                })
+            })
+        }
+
+        // 启动主题
+        function useTheme(id) {
+            Core.confirm("确定启用该主题？", function () {
+                Core.postAjax("/theme/use", {"id": id}, function (data) {
+                    if (data.status === 200) {
+                        Core.refreshTable("#table");
+                    }
+                    layer.msg(data.msg);
+                })
+            })
+        }
+
+        // 批量删除
+        $("#btn_batch_delete").on('click', function () {
+            var checkedRows = Core.selectMutiData("#table");
+            if (checkedRows) {
+                Core.confirm("确定删除选中的" + checkedRows.length + "条记录？", function () {
+                    var ids = [];
+                    $.each(checkedRows, function (i, item) {
+                        ids.push(item.id);
+                    })
+                    Core.postAjax("/theme/batch/delete", {"ids": ids}, function (data) {
+                        if (data.status === 200) {
+                            refreshTable();
+                        }
+                        layer.msg(data.msg);
+                    })
+                })
+            }
+        })
+
+        // 保存或更新
+        $('#saveOrUpdateBtn').on('click', function () {
+            var $f = $('#themeForm');
+            var valid = $f[0].checkValidity();
+            var url = $f.find("input[name='id']").val() ? "/theme/edit" : "/theme/add"
+            if (valid) {
+                Core.mask("#saveOrUpdateBtn");
+                Core.postAjax(url, $f.serialize(), function (data) {
+                    Core.unmask("#saveOrUpdateBtn");
+                    if (data.status === 200) {
+                        $("#formModal").modal("hide");
+                        refreshTable();
+                    }
+                    layer.msg(data.msg);
+                }, function () {
+                    Core.unmask("#saveOrUpdateBtn");
+                })
+            }
+            $f.addClass("was-validated")
+        })
+
+    });
+
+    function previewImg(src) {
+        layer.open({
+            type: 1,
+            title: false,
+            closeBtn: 0,
+            area: '85%',
+            skin: 'layui-layer-nobg', //没有背景色
+            shadeClose: true,
+            content: '<img style="width: 100%" alt="theme" src="' + src + '">'
+        });
+    }
+
+</script>

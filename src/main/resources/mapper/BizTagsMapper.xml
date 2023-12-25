@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.xunmaw.cms.module.admin.mapper.BizTagsMapper">
+	<resultMap id="rm" type="com.xunmaw.cms.module.admin.model.BizTags">
+		<result property="id" jdbcType="INTEGER" column="id"/>
+		<result property="name" jdbcType="VARCHAR" column="name"/>
+		<result property="description" jdbcType="VARCHAR" column="description"/>
+		<result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+		<result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		id,
+		`name`,
+		description,
+		create_time,
+		update_time
+	</sql>
+	<select id="selectTags" parameterType="com.xunmaw.cms.module.admin.model.BizTags" resultMap="rm" >
+		select <include refid="Base_Column_List"/>
+		FROM biz_tags
+		WHERE 1=1
+		<if test="bizTags.name !=null and bizTags.name != ''">
+			AND `name` like concat('%', #{bizTags.name}, '%')
+		</if>
+		<if test="bizTags.description !=null and bizTags.description != ''">
+			AND description like concat('%', #{bizTags.description}, '%')
+		</if>
+	</select>
+</mapper>
+

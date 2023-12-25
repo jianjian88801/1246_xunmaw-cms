@@ -1,0 +1,344 @@
+<link th:href="@{admin/plugins/wangeditor5/style.min.css}" rel="stylesheet">
+<style>
+    #editor—wrapper {
+        border: 1px solid #ccc;
+        z-index: 100; /* 按需定义 */
+    }
+    #toolbar-container { border-bottom: 1px solid #ccc; }
+    #editor-container { height: 800px; }
+</style>
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">发布/编辑文章</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a th:href="@{admin}">首页</a></li>
+                    <li class="breadcrumb-item active">文章管理</li>
+                    <li class="breadcrumb-item active">发布/编辑文章</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- Main content -->
+<section class="content">
+    <div class="card card-info p-3">
+        <form id="articleForm" class="row">
+            <input th:value="${article?.id}" type="hidden" name="id">
+            <input id="status" type="hidden" name="status">
+            <input id="articleContent" type="hidden" name="content" th:value="${article?.content}">
+            <input id="articleContentMd" type="hidden" name="contentMd">
+            <div class="col-lg-8">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="title" name="title" th:value="${article?.title}"
+                           placeholder="请输入文章标题">
+                </div>
+                <div class="form-group">
+                    <div id="editor—wrapper">
+                        <div id="toolbar-container"><!-- 工具栏 --></div>
+                        <div id="editor-container"><!-- 编辑器 --></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 p-3" style="border: 1px solid #ddd;border-radius: 4px;">
+                <div class="form-group col-xs-12">
+                    <label class="control-label">文章分类:</label>
+                    <select id="category-select" class="form-control" name="categoryId" required>
+                        <block th:each="category: ${categories}">
+                            <option th:if="${#lists.isEmpty(category.children)}" th:value="${category.id}" th:label="${category.name}" th:selected="${article?.categoryId == category.id}"></option>
+                            <optgroup th:unless="${#lists.isEmpty(category.children)}" th:label="${category.name}">
+                                <option th:each="child: ${category.children}" th:value="${child.id}" th:label="${child.name}" th:selected="${article?.categoryId == child.id}"></option>
+                            </optgroup>
+                        </block>
+                    </select>
+                </div>
+                <div class="form-group col-xs-12">
+                    <label class="control-label label-four">文章标签:</label>
+                    <div>
+                        <div class="icheck-primary icheck-inline" th:each="tag:${tags}">
+                            <input type="checkbox" th:id="'tag_' + ${tag.id}" name="tag" th:value="${tag.id}"
+                                   th:checked="${#lists.contains(article?.tags,tag) ? true: false}"/>
+                            <label th:for="'tag_' + ${tag.id}" th:text="${tag.name}"></label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12">
+                    <label class="control-label label-four">文章封面:</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="coverImage" id="coverImage"
+                               th:value="${article?.coverImage}"
+                               placeholder="文章封面地址">
+                        <div id="upload-img-btn" class="btn btn-default input-group-btn" style="min-width: 50px">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="upload-cover-content" class="form-group col-md-12 hidden">
+                    <div class="upload-item">
+                        <p class="upload-title">封面图</p>
+                        <p class="upload-file"><i class="fa fa-cloud-upload fz-70"></i></p>
+                        <p class="upload-btns"><a type="button"
+                                                  class="btn btn-sm btn-block btn-info coverUploader">上传</a>
+                        </p></div>
+                </div>
+
+                <div class="form-group col-xs-12">
+                    <label class="control-label label-four">文章类型:</label>
+                    <div class="ml-3">
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="artile_source_original" name="original" value="1"
+                                   th:field="*{article.original}"/>
+                            <label for="artile_source_original">原创</label>
+                        </div>
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="artile_source_reprint" name="original" value="0"
+                                   th:field="*{article.original}"/>
+                            <label for="artile_source_reprint">转载</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12">
+                    <label class="control-label">是否轮播:</label>
+                    <div class="ml-3">
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="slider_on" name="slider" value="1" th:field="*{article.slider}"/>
+                            <label for="slider_on">是</label>
+                        </div>
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="slider_off" name="slider" value="0" th:field="*{article.slider}"/>
+                            <label for="slider_off">否</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="sliderImgContent"
+                     th:class="${article?.slider == 1 ? 'form-group col-md-12':'form-group col-md-12 hidden'}">
+                    <div class="col-xs-12">
+                        <label class="control-label label-four">轮播图:</label>
+                        <div class="input-group ml80" style="position: relative">
+                            <input id="sliderImg" type="text" class="form-control" name="sliderImg"
+                                   th:value="${article.sliderImg}"
+                                   placeholder="轮播图地址（建议800*300）">
+                            <div id="upload-slider-btn" class="btn btn-default" style="min-width: 50px">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="upload-slider-content" class="form-group col-md-12 hidden">
+                    <div class="upload-item">
+                        <p class="upload-title">轮播图</p>
+                        <p class="upload-file"><i class="fa fa-cloud-upload fz-70"></i></p>
+                        <p class="upload-btns"><a type="button"
+                                                  class="btn btn-sm btn-block btn-info sliderUploader">上传</a></p>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12">
+                    <label class="control-label">是否置顶:</label>
+                    <div class="ml-3">
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="top_on" name="top" value="1" th:field="*{article.top}"/>
+                            <label for="top_on">是</label>
+                        </div>
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="top_off" name="top" value="0" th:field="*{article.top}"/>
+                            <label for="top_off">否</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12">
+                    <label class="control-label">是否推荐:</label>
+                    <div class="ml-3">
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="recommended_on" name="recommended" value="1"
+                                   th:field="*{article.recommended}"/>
+                            <label for="recommended_on">是</label>
+                        </div>
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="recommended_off" name="recommended" value="0"
+                                   th:field="*{article.recommended}"/>
+                            <label for="recommended_off">否</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12">
+                    <label class="control-label">开启评论:</label>
+                    <div class="ml-3">
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="comment_on" name="comment" value="1"
+                                   th:field="*{article.comment}"/>
+                            <label for="comment_on">是</label>
+                        </div>
+                        <div class="icheck-primary icheck-inline">
+                            <input type="radio" id="comment_off" name="comment" value="0"
+                                   th:field="*{article.comment}"/>
+                            <label for="comment_off">否</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group col-xs-12">
+                    <label class="control-label">概要:</label>
+                    <div class="ml-3">
+                                <textarea type="text" rows="2" class="form-control" name="description"
+                                          th:text="${article?.description}"
+                                          placeholder="文章概要"></textarea>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12">
+                    <label class="control-label">关键词:</label>
+                    <div class="ml-3">
+                            <textarea type="text" rows="2" class="form-control" name="keywords"
+                                      th:text="${article?.keywords}"
+                                      placeholder="文章关键词（SEO优化）"></textarea>
+                    </div>
+                </div>
+                <div class="form-group mt-4">
+                    <div class="row">
+                        <button type="button" th:if="${article?.id == null}" class="btn btn-primary btn-lg col-md-4 offset-1"
+                                onclick="addOrUpdateArticle(1, true)">发布文章
+                        </button>
+                        <button type="button" th:if="${article?.id == null}" class="btn btn-secondary btn-lg col-md-4 offset-2"
+                                onclick="addOrUpdateArticle(0, true)">保存草稿
+                        </button>
+                        <button type="button" th:unless="${article?.id == null}" class="btn btn-primary btn-lg col-md-4 offset-2"
+                                onclick="addOrUpdateArticle(1, false)">发布更新
+                        </button>
+                        <button type="button" th:unless="${article?.id == null}" class="btn btn-secondary btn-lg col-md-4 offset-2"
+                                onclick="addOrUpdateArticle(0, false)">更新草稿
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script th:src="@{admin/plugins/wangeditor5/index.min.js}"></script>
+<script>
+    var E = window.wangEditor
+    window.editor = E.createEditor({
+        selector: '#editor-container',
+        html: $('#articleContent').val(),
+        config: {
+            placeholder: '今天分享什么内容呢...',
+            MENU_CONF: {
+                uploadImage: {
+                    //上传文件参数名，与后台接收的参数名一致
+                    fieldName: 'file',
+                    // 10kb 以下插入 base64
+                    base64LimitSize: 10 * 1024,
+                    server: '/attachment/uploadForEditor',
+                },
+                uploadVideo: {
+                    fieldName: 'file',
+                    server: '/attachment/uploadForEditor',
+                }
+            },
+            onChange(editor) {
+                // console.log(editor.getHtml())
+            }
+        }
+    })
+
+    window.toolbar = E.createToolbar({
+        editor,
+        selector: '#toolbar-container',
+        config: {}
+    })
+</script>
+<script>
+
+    $(function () {
+        initSliderUploadContent();
+
+
+    })
+
+    function initSliderUploadContent() {
+        var showSlider = $("input[name=slider]:checked").val();
+        if (parseInt(showSlider)) {
+            $("#sliderImgContent").show();
+        } else {
+            $("#sliderImgContent").hide();
+            $("#upload-slider-content").hide();
+        }
+    }
+
+    function addOrUpdateArticle(status, addFlag) {
+        if (validArticle()) {
+            Core.confirm("确认保存文章？", function () {
+                $("#status").val(status);
+                if (addFlag) {
+                    Core.postAjax("/article/add", $("#articleForm").serialize(), function (data) {
+                        if (data.status === 200) {
+                            editor.clear();
+                            Core.load("#content", "article/add");
+                        }
+                        layer.msg(data.msg)
+                    })
+                } else {
+                    Core.postAjax("/article/edit", $("#articleForm").serialize(), function (data) {
+                        layer.msg(data.msg)
+                    })
+                }
+            })
+        }
+    }
+
+    function validArticle() {
+        var content = editor.getHtml();
+        if (content) {
+            $("#articleContentMd").val(content);
+            $("#articleContent").val(content);
+            // 文章标签必填项校验
+            var tags = [];
+            $('input[name="tag"]:checked').each(function () {
+                tags.push($(this).val());
+            });
+            if (tags.length > 0) {
+                return true;
+            } else {
+                layer.msg("请选择文章标签！")
+                return false;
+            }
+        } else {
+            layer.msg("请输入文章内容！")
+            return false;
+        }
+    }
+
+    $(function () {
+        /*上传图片*/
+        $("#upload-img-btn").click(function () {
+            $('#upload-cover-content').toggle()
+            $(".coverUploader").upload({
+                server: '[[@{/attachment/upload}]]',
+                swf: '/admin/img/Uploader.swf',
+                imgAccept: true
+            }, function (url, picker) {
+                $("#coverImage").val(url);
+                echoGtUploadResMethd(url, picker);
+            });
+        })
+
+        $("#upload-slider-btn").click(function () {
+            $('#upload-slider-content').toggle()
+            $(".sliderUploader").upload({
+                server: '[[@{/attachment/upload}]]',
+                swf: '/admin/img/Uploader.swf',
+                imgAccept: true
+            }, function (url, picker) {
+                $("#sliderImg").val(url);
+                echoGtUploadResMethd(url, picker);
+            });
+        })
+        $('input[type=radio][name=slider]').change(function () {
+            initSliderUploadContent()
+        });
+
+    })
+</script>

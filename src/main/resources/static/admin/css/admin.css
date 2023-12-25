@@ -1,0 +1,24 @@
+.theme-pre{
+    width: 150px;
+}
+.theme-pre img{
+    width: 100%;
+}
+
+.comment-parent{
+    padding-left: 15px;
+    background-color: #e9e9e9
+}
+
+.cursor-pointer{
+    cursor: pointer;
+}
+
+.display-none{
+    display: none;
+}
+
+/*优化所有查询框*/
+#searchForm {
+    margin-left: 10px !important;
+}

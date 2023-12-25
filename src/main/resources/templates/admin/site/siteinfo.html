@@ -1,0 +1,120 @@
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">网站管理</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a th:href="@{admin}">首页</a></li>
+                    <li class="breadcrumb-item active">网站管理</li>
+                    <li class="breadcrumb-item active">基础信息</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- Main content -->
+<section class="content">
+    <div class="card card-body">
+        <form id="siteInfoForm">
+            <div class="form-group row">
+                <label for="SITE_NAME" class="col-sm-1 col-form-label">网站名称:</label>
+                <div class="col-sm-11">
+                    <input type="text" th:value="${siteinfo?.SITE_NAME}" name="SITE_NAME" class="form-control"
+                           id="SITE_NAME"
+                           placeholder="填写网站名称" required>
+                    <div class="invalid-feedback">请填写网站名称</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="SITE_KWD" class="col-sm-1 col-form-label">网站关键字:</label>
+                <div class="col-sm-11">
+                    <textarea th:text="${siteinfo?.SITE_KWD}" rows="2" type="text" class="form-control" id="SITE_KWD"
+                              name="SITE_KWD"></textarea>
+                    <div class="invalid-feedback">请填写网站关键字</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="SITE_DESC" class="col-sm-1 col-form-label">网站描述:</label>
+                <div class="col-sm-11">
+                    <textarea th:text="${siteinfo?.SITE_DESC}" rows="2" type="text" class="form-control" id="SITE_DESC"
+                              name="SITE_DESC"></textarea>
+                    <div class="invalid-feedback">请填写网站描述</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="SITE_PERSON_PIC" class="col-sm-1 col-form-label">站长头像:</label>
+                <div class="col-sm-11">
+                    <input type="text" th:value="${siteinfo?.SITE_PERSON_PIC}" name="SITE_PERSON_PIC"
+                           class="form-control" id="SITE_PERSON_PIC"
+                           placeholder="填写站长头像地址" required>
+                    <div class="invalid-feedback">请填写站长头像地址</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="SITE_PERSON_NAME" class="col-sm-1 col-form-label">站长名称:</label>
+                <div class="col-sm-11">
+                    <input type="text" th:value="${siteinfo?.SITE_PERSON_NAME}" name="SITE_PERSON_NAME"
+                           class="form-control" id="SITE_PERSON_NAME"
+                           placeholder="填写站长名称" required>
+                    <div class="invalid-feedback">请填写站长名称</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="SITE_PERSON_DESC" class="col-sm-1 col-form-label">站长描述:</label>
+                <div class="col-sm-11">
+                    <textarea th:text="${siteinfo?.SITE_PERSON_DESC}" rows="2" type="text" class="form-control"
+                              id="SITE_PERSON_DESC" name="SITE_PERSON_DESC"></textarea>
+                    <div class="invalid-feedback">请填写站长描述</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="BAIDU_PUSH_URL" class="col-sm-1 col-form-label">百度推送地址:</label>
+                <div class="col-sm-11">
+                    <input type="text" th:value="${siteinfo?.BAIDU_PUSH_URL}" name="BAIDU_PUSH_URL" class="form-control"
+                           id="BAIDU_PUSH_URL"
+                           placeholder="填写百度推送地址" required>
+                    <div class="invalid-feedback">请填写百度推送地址</div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="SITE_STATIC" class="col-sm-1 col-form-label">网站静态化:</label>
+                <div class="col-sm-11">
+                    <input type="checkbox" id="SITE_STATIC" name="SITE_STATIC"
+                           th:checked="${#bools.isTrue(siteinfo?.get('SITE_STATIC'))}">
+                    <input type="hidden" name="SITE_STATIC" value="off"/>
+                </div>
+            </div>
+        </form>
+        <shiro:hasPermission name="siteinfo:edit">
+            <div class="btn-group mt-3">
+                <button type="submit" id="btn_save" class="btn btn-success">保存</button>
+            </div>
+        </shiro:hasPermission>
+    </div>
+</section>
+
+<script>
+    $(function () {
+
+        $("#SITE_STATIC").bootstrapSwitch({onText: '开启', offText: '关闭'})
+
+        $('#btn_save').on('click', function () {
+            var $f = $('#siteInfoForm');
+            var valid = $f[0].checkValidity();
+            var url = '/siteinfo/edit'
+            if (valid) {
+                $f.addClass("was-validated")
+                Core.mask("#btn_save");
+                Core.postAjax(url, $f.serialize(), function (data) {
+                    Core.unmask("#btn_save");
+                    layer.msg(data.msg);
+                    $f.removeClass("was-validated")
+                }, function () {
+                    Core.unmask("#btn_save");
+                })
+            }
+        })
+    })
+</script>
