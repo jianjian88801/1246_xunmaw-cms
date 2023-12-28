@@ -25,11 +25,17 @@ import java.util.Map;
 public class CommonDataService {
 
     private final BizCategoryService bizCategoryService;
+	
     private final BizArticleService bizArticleService;
+	
     private final BizTagsService bizTagsService;
+	
     private final BizLinkService bizLinkService;
+	
     private final BizSiteInfoService siteInfoService;
+	
     private final SysConfigService sysConfigService;
+	
 
     public Object get(String moduleName) {
         try {
