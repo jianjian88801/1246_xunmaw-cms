@@ -38,7 +38,7 @@ import java.util.Map;
  *
  * @author xunmaw
  * @version V1.0
- * @date 2019年9月11日
+ * @date 2023年9月11日
  */
 @Configuration
 public class ShiroConfig {
