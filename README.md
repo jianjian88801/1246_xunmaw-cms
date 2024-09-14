@@ -1,6 +1,5 @@
 # 寻码网文章资讯管理系统
 
-##  联系不到我，就看我的主页 
  
 #### 介绍
 本系统是基于JavaWeb实现的寻码网文章资讯管理系统，前端：html + ajax；后端：SpringBoot+Mybatis-plus；系统环境：jdk1.8 | mysql | redis。满足基本的个人博客的搭建
